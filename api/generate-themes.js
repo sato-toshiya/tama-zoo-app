@@ -1,121 +1,56 @@
-// /api/generate-themes.js
+const generateThemes = async () => {
+    // 1. ローディング画面を表示し、次のステップへ移動
+    setIsLoading(true);
+    setCurrentStep(1);
 
-// このファイルはVercelのサーバーレス関数として動作します。
-// ライブラリを使わず、直接Google Gemini APIと通信します。
+    // 2. AIへの指示（プロンプト）を作成
+    const animalCategory = categories.find(c => c.id === formData.category)?.name || '動物';
+    const difficultyText = formData.difficulty === '1' ? '簡単な観察中心' : formData.difficulty === '2' ? '少し詳しい比較や分析' : 'より深い研究';
 
-export default async function handler(req, res) {
-  // CORSヘッダーを設定（ローカル開発で必要）
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    // 既存のテーマをAIへの高品質な「お手本」として使う
+    const exampleTheme = JSON.stringify(observationThemes.mammal.easy[0], null, 2);
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+    const prompt = `
+あなたは小学生向けの自由研究をサポートするAIアシスタントです。
+以下の#条件に合った、動物園で観察できる面白い研究テーマを3つ提案してください。
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+#条件
+- 対象学年: 小学${formData.grade}年生
+- 興味のある動物カテゴリ: ${animalCategory}
+- 希望する難易度: ${difficultyText}
+- 出力形式: 必ず以下のJSON形式の「配列」として返してください。idはユニークな連番にしてください。
 
-  try {
-    // 1. ブラウザから送られてきたプロンプトを取得
-    const { prompt } = req.body;
-    if (!prompt) {
-      return res.status(400).json({ error: 'プロンプトは必須です。' });
+#出力形式のサンプル
+\`\`\`json
+[
+  ${exampleTheme}
+]
+\`\`\`
+`;
+
+    // 3. AI APIを呼び出す（※ ここではシミュレーションを行います）
+    try {
+      // --- 将来的に、ここに実際のAPI呼び出しコード（fetchなど）を記述します ---
+      console.log("AIへの指示（プロンプト）:", prompt);
+
+      // AIが2秒間考えているように見せるシミュレーション
+      const aiResponse = await new Promise(resolve => {
+        setTimeout(() => {
+          // シミュレーションのため、既存のデータから3つのテーマを返す
+          const categoryThemes = observationThemes[formData.category] || observationThemes.mammal;
+          const themes = (categoryThemes[formData.difficulty === '1' ? 'easy' : 'normal'] || categoryThemes.easy).slice(0, 3);
+          resolve(themes);
+        }, 2000);
+      });
+      // --- シミュレーションここまで ---
+
+      setProposedThemes(aiResponse);
+
+    } catch (error) {
+      console.error("AIからのテーマ取得に失敗しました:", error);
+      alert("テーマの生成に失敗しました。もう一度お試しください。");
+      setCurrentStep(0); // エラー時は質問画面に戻る
+    } finally {
+      setIsLoading(false); // ローディングを終了
     }
-
-    // 2. Vercelの環境変数から安全にAPIキーを取得
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'サーバーにAPIキーが設定されていません。' });
-    }
-    
-    // Gemini 1.5 FlashモデルのAPIエンドポイント
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-
-    // 3. Gemini APIに送信する設定を作成
-    const payload = {
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        response_mime_type: "application/json",
-      },
-      // ツールとしてJSONスキーマを定義
-      tools: [{
-        function_declarations: [{
-          name: "display_research_themes",
-          description: "動物の自由研究テーマを提案する",
-          parameters: {
-            type: "OBJECT",
-            properties: {
-              themes: {
-                type: "ARRAY",
-                description: "提案する3つの研究テーマのリスト",
-                items: {
-                  type: "OBJECT",
-                  properties: {
-                    id: { type: "INTEGER", description: "1から始まるテーマID" },
-                    title: { type: "STRING", description: "子供がワクワクするようなテーマ名" },
-                    question: { type: "STRING", description: "研究の中心となる具体的な問い" },
-                    guide: { type: "STRING", description: "観察のヒントや面白い豆知識" },
-                    points: {
-                      type: "ARRAY",
-                      description: "4つの具体的な観察ポイントのリスト",
-                      items: {
-                        type: "OBJECT",
-                        properties: {
-                          id: { type: "INTEGER", description: "1から始まるポイントID" },
-                          title: { type: "STRING", description: "観察ポイントのタイトル" },
-                          question: { type: "STRING", description: "観察ポイントの具体的な問い" },
-                          guide: { type: "STRING", description: "観察の具体的なヒント" }
-                        },
-                        required: ["id", "title", "question", "guide"]
-                      }
-                    }
-                  },
-                  required: ["id", "title", "question", "guide", "points"]
-                }
-              }
-            },
-            required: ["themes"]
-          }
-        }]
-      }],
-      tool_config: {
-        function_calling_config: {
-          mode: "ANY",
-          allowed_function_names: ["display_research_themes"]
-        }
-      }
-    };
-
-    // 4. Gemini APIにリクエストを送信
-    const apiResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!apiResponse.ok) {
-      const errorBody = await apiResponse.text();
-      console.error("Gemini API Error:", errorBody);
-      throw new Error(`Gemini API error: ${apiResponse.statusText}`);
-    }
-
-    const result = await apiResponse.json();
-    
-    // 5. APIからの結果を解析し、ブラウザに送信
-    const functionCall = result.candidates?.[0]?.content?.parts?.[0]?.functionCall;
-    if (functionCall && functionCall.name === 'display_research_themes') {
-      const themes = functionCall.args.themes || [];
-      return res.status(200).json(themes);
-    } else {
-      console.error("Unexpected AI response structure:", JSON.stringify(result, null, 2));
-      throw new Error("AIからの応答が予期した形式ではありません。");
-    }
-
-  } catch (error) {
-    // 6. エラーが発生した場合の処理
-    console.error('サーバーでエラーが発生しました:', error);
-    return res.status(500).json({ error: 'テーマの生成中にエラーが発生しました。' });
-  }
-}
+  };
