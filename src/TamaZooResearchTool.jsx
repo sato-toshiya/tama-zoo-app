@@ -1344,7 +1344,7 @@ const TamaZooResearchTool = () => {
 
         {/* フッター */}
         <div className="mt-8 text-center text-xs text-gray-500 border-t pt-4">
-          多摩動物公園 自由研究作成ツールで作成
+          「Zooっと自由研究」で作成
         </div>
       </div>
 
@@ -1407,7 +1407,7 @@ const TamaZooResearchTool = () => {
       <header className="bg-green-700 text-white p-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            🦁 多摩動物公園 自由研究作成ツール
+            🦁 多摩動物公園 Zooっと自由研究
           </h1>
           <p className="text-green-100 mt-1">動物たちと一緒に素敵な研究をしよう！</p>
         </div>
@@ -1451,7 +1451,7 @@ const TamaZooResearchTool = () => {
       {/* フッター */}
       <footer className="bg-green-700 text-white p-4 mt-8">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-green-100">© 多摩動物公園 自由研究作成ツール</p>
+          <p className="text-green-100">© Zooっと自由研究</p>
         </div>
       </footer>
     </div>
