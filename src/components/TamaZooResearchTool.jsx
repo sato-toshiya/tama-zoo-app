@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { ChevronRight, ChevronLeft, Camera, FileDown, Mail, Share2, Star, Eye, PenTool } from 'lucide-react';
 
 const TamaZooResearchTool = () => {
-  // --- STATE MANAGEMENT ---
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     grade: '4',
@@ -17,7 +16,6 @@ const TamaZooResearchTool = () => {
   const [proposedThemes, setProposedThemes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // --- APP STRUCTURE ---
   const steps = [
     { id: 'questions', title: '質問', icon: '?' },
     { id: 'themes', title: 'テーマ提案', icon: '💡' },
@@ -34,7 +32,6 @@ const TamaZooResearchTool = () => {
     { id: 'other', name: 'その他（比較研究など）' }
   ];
 
-  // --- HANDLER FUNCTIONS ---
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -42,8 +39,7 @@ const TamaZooResearchTool = () => {
   const nextStep = () => currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
   const prevStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
 
-const getAiThemes = async () => {
-    // どちらかの入力が必須かチェック
+  const getAiThemes = async () => {
     if ((!formData.category || !formData.difficulty) && !formData.freeTextQuery) {
       alert('「おすすめからえらぶ」か「じゆうに書く」のどちらかを入力してね！');
       return;
@@ -52,7 +48,6 @@ const getAiThemes = async () => {
     setProposedThemes([]);
     setCurrentStep(1);
 
-    // --- ここからが重要：AIへの指示を動的に組み立てる ---
     let userRequest = '';
     if (formData.category && formData.difficulty) {
         const categoryName = categories.find(c => c.id === formData.category)?.name || '';
@@ -62,9 +57,8 @@ const getAiThemes = async () => {
     if (formData.freeTextQuery) {
         userRequest += `・自由記述: ${formData.freeTextQuery}\n`;
     }
-    // --- ここまで ---
 
-    const prompt = `あなたは、東京の「多摩動物公園」の自由研究をサポートする、非常に優秀なAIアシスタントです。
+     const prompt = `あなたは、東京の「多摩動物公園」の自由研究をサポートする、非常に優秀なAIアシスタントです。
 
 # あなたの役割
 ユーザーの希望に合わせて、小学生がワクワクするような、具体的で観察可能な自由研究のテーマを3つ提案してください。
@@ -72,8 +66,7 @@ const getAiThemes = async () => {
 # 厳守するルール
 - 提案するテーマは、必ず「多摩動物公園」で観察できる動物や昆虫を題材にしてください。
 - ユーザーの希望が具体的な動物名でなくても、関連する面白い研究を考えてください。
-- 「動物の比較」など、複数の動物や昆C충을 横断的に観察するような、ユニークな視点のテーマも積極的に提案してください。
-- あなたが生成する応答は、指示されたJSON形式のみとし、他のテキストは一切含めないでください。
+- 「動物の比較」など、複数の動物や昆虫を横断的に観察するような、ユニークな視点のテーマも積極的に提案してください。
 
 # 多摩動物公園の主な動物・昆虫（参考）
 - アフリカ園: ライオン, キリン, シマウマ, サーバル, チーター, アフリカゾウ
@@ -87,7 +80,50 @@ const getAiThemes = async () => {
 ${userRequest}
 
 # 出力形式
-あなたはfunction callingツールが設定されているので、ツール定義に従って応答してください。
+あなたの応答は、以下のJSON形式の例に厳密に従ってください。他のテキストは一切含めず、このJSONオブジェクトのみを返してください。
+
+\`\`\`json
+{
+  "themes": [
+    {
+      "id": 1,
+      "title": "（ここに1つ目のテーマ名）",
+      "question": "（ここに中心的な問い）",
+      "guide": "（ここに観察のヒント）",
+      "points": [
+        { "id": 1, "title": "（ポイント1のタイトル）", "question": "（ポイント1の問い）", "guide": "（ポイント1のヒント）" },
+        { "id": 2, "title": "（ポイント2のタイトル）", "question": "（ポイント2の問い）", "guide": "（ポイント2のヒント）" },
+        { "id": 3, "title": "（ポイント3のタイトル）", "question": "（ポイント3の問い）", "guide": "（ポイント3のヒント）" },
+        { "id": 4, "title": "（ポイント4のタイトル）", "question": "（ポイント4の問い）", "guide": "（ポイント4のヒント）" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "（ここに2つ目のテーマ名）",
+      "question": "（ここに中心的な問い）",
+      "guide": "（ここに観察のヒント）",
+      "points": [
+        { "id": 1, "title": "...", "question": "...", "guide": "..." },
+        { "id": 2, "title": "...", "question": "...", "guide": "..." },
+        { "id": 3, "title": "...", "question": "...", "guide": "..." },
+        { "id": 4, "title": "...", "question": "...", "guide": "..." }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "（ここに3つ目のテーマ名）",
+      "question": "（ここに中心的な問い）",
+      "guide": "（ここに観察のヒント）",
+      "points": [
+        { "id": 1, "title": "...", "question": "...", "guide": "..." },
+        { "id": 2, "title": "...", "question": "...", "guide": "..." },
+        { "id": 3, "title": "...", "question": "...", "guide": "..." },
+        { "id": 4, "title": "...", "question": "...", "guide": "..." }
+      ]
+    }
+  ]
+}
+\`\`\`
 `;
 
     try {
@@ -98,7 +134,6 @@ ${userRequest}
       });
 
       if (!response.ok) {
-        // サーバーからエラー応答が返ってきた場合、その内容をテキストとして読み取る
         const errorText = await response.text();
         console.error("Server error response:", errorText);
         throw new Error('AIとの通信に失敗しました。サーバーログを確認してください。');
@@ -117,8 +152,22 @@ ${userRequest}
   };
 
   const selectTheme = (theme) => {
-    const initialPoints = (theme.points || []).map(point => ({ ...point, hypothesis: '', observation: '', observationImage: null, insights: '' }));
-    setFormData(prev => ({ ...prev, selectedTheme: theme.title, observationPoints: initialPoints }));
+    // AIからの応答にユニークIDを付与して、問題を確実に解決する
+    const initialPoints = (theme.points || []).map((point, index) => ({
+      ...point,
+      // AIがidを返し忘れても、ここでユニークなID (0, 1, 2, 3...) を保証する
+      id: point.id || index, 
+      hypothesis: '',
+      observation: '',
+      observationImage: null,
+      insights: ''
+    }));
+
+    setFormData(prev => ({
+      ...prev,
+      selectedTheme: theme.title,
+      observationPoints: initialPoints
+    }));
   };
   
   const updateObservationPoint = (pointId, field, value) => {
@@ -135,7 +184,6 @@ ${userRequest}
     }
   };
 
-  // --- RENDER FUNCTIONS ---
   const renderQuestions = () => (
     <div className="space-y-6">
       <h2 className="text-3xl font-jpTitle text-center text-green-800 mb-6">きみのことを教えてね！</h2>
@@ -145,7 +193,6 @@ ${userRequest}
           {[1,2,3,4,5,6].map(grade => (<button key={grade} onClick={() => handleInputChange('grade', grade.toString())} className={`p-3 rounded-lg border-2 text-md font-bold transition-colors ${formData.grade === grade.toString() ? 'border-green-500 bg-green-100 text-green-800' : 'border-gray-300 hover:border-green-300'}`}>{grade}年生</button>))}
         </div>
       </div>
-      
       <div className="bg-green-50 p-6 rounded-lg shadow-inner border border-green-200">
         <label className="block text-lg font-bold text-gray-700 mb-3">② おすすめからえらぶ</label>
         <div className="space-y-4">
@@ -158,17 +205,11 @@ ${userRequest}
             </div>
         </div>
       </div>
-
-      <div className="relative flex items-center">
-        <hr className="w-full border-t border-gray-300" />
-        <span className="absolute left-1/2 -translate-x-1/2 bg-green-50 px-2 font-bold text-gray-500"></span>
-      </div>
-
+      <div className="relative flex items-center"><hr className="w-full border-t border-gray-300" /><span className="absolute left-1/2 -translate-x-1/2 bg-white px-2 font-bold text-gray-500">または</span></div>
       <div className="bg-yellow-50 p-6 rounded-lg shadow-inner border border-yellow-200">
-        <label className="block text-lg font-bold text-gray-700 mb-3">③ 好きな動物や不思議だと思うことを書いてみよう</label>
+        <label className="block text-lg font-bold text-gray-700 mb-3">③ じゆうに書く</label>
         <textarea value={formData.freeTextQuery} onChange={(e) => handleInputChange('freeTextQuery', e.target.value)} className="w-full p-3 border-2 border-gray-300 rounded-lg text-lg focus:border-yellow-500 focus:outline-none" rows="3" placeholder="例：ライオンのたてがみ、昆虫館のチョウ、チーターとサーバルネコの比較" />
       </div>
-
       <button onClick={getAiThemes} disabled={!formData.grade || ((!formData.category || !formData.difficulty) && !formData.freeTextQuery)} className="w-full bg-yellow-400 text-gray-800 text-xl font-bold py-4 px-6 rounded-lg hover:bg-yellow-500 disabled:bg-gray-400 transition-colors flex items-center justify-center gap-2">
         <span className="text-2xl">🤖</span> AIにテーマを考えてもらう！
       </button>
@@ -176,7 +217,6 @@ ${userRequest}
   );
 
   const renderThemes = () => {
-    // テーマ提案画面の上部に表示するサマリー文を動的に生成
     const renderSummary = () => {
         if (formData.category) {
             const categoryName = categories.find(c => c.id === formData.category)?.name || '';
@@ -216,16 +256,80 @@ ${userRequest}
     );
   };
   
-  // renderSelection, renderResearch, renderReflection, renderPreview は変更がないため、以前のコードをそのまま使います。
-  const renderSelection = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-green-800 mb-6 font-jpTitle">📝 このテーマを選んだ理由</h2>
-      <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500"><h3 className="text-lg font-bold text-green-800 mb-2">選んだテーマ</h3><p className="text-green-700">{formData.selectedTheme}</p></div>
-      <div className="bg-white p-6 rounded-lg shadow-md"><label className="block text-lg font-semibold text-gray-700 mb-3">なぜこのテーマを選びましたか？</label><textarea value={formData.selectionReason} onChange={(e) => handleInputChange('selectionReason', e.target.value)} className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none" rows="4" placeholder="例：面白そうだから。いつも寝ているけど、他の時は何をしているか気になったから。" /></div>
-      <div className="flex gap-4"><button onClick={prevStep} className="flex-1 bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 flex items-center justify-center gap-2"><ChevronLeft className="w-5 h-5" /> 戻る</button><button onClick={nextStep} className="flex-1 bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">研究を始める <ChevronRight className="w-5 h-5" /></button></div>
-    </div>
-  );
+  const renderSelection = () => {
+    // 選択された理由を管理するためのヘルパー関数
+    const handleReasonChange = (reason, isChecked) => {
+      // 現在の理由をカンマで区切って配列にする（空の要素は除く）
+      const currentReasons = formData.selectionReason.split(',').filter(r => r.trim());
+      let newReasons;
 
+      if (isChecked) {
+        // チェックされたら理由を追加
+        newReasons = [...currentReasons, reason];
+      } else {
+        // チェックが外されたら理由を削除
+        newReasons = currentReasons.filter(r => r !== reason);
+      }
+      // 配列を再びカンマ区切りの文字列に戻してstateを更新
+      handleInputChange('selectionReason', newReasons.join(','));
+    };
+
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-green-800 mb-6 font-jpTitle">📝 このテーマを選んだ理由</h2>
+        <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
+          <h3 className="text-lg font-bold text-green-800 mb-2">選んだテーマ</h3>
+          <p className="text-green-700">{formData.selectedTheme}</p>
+        </div>
+
+        {/* --- 選択式の理由 --- */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <label className="block text-lg font-semibold text-gray-700 mb-3">
+            あてはまるものを選んでね（いくつでもOK）
+          </label>
+          <div className="space-y-3">
+            {[
+              '動物が好きだから',
+              '面白そうだから',
+              '新しいことを発見したいから',
+              'くらべる研究がしたかったから',
+              '動物園でよく見る動物だから'
+            ].map(reason => (
+              <label key={reason} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="w-5 h-5 text-green-600 rounded focus:ring-green-500 border-gray-300"
+                  // 現在の理由にこの選択肢が含まれているかをチェック
+                  checked={formData.selectionReason.includes(reason)}
+                  onChange={(e) => handleReasonChange(reason, e.target.checked)}
+                />
+                <span className="text-gray-700">{reason}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        
+        {/* --- 自由記述の理由 --- */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <label className="block text-lg font-semibold text-gray-700 mb-3">
+            他に理由があれば自由に書いてね
+          </label>
+          <textarea
+            value={formData.selectionReason}
+            onChange={(e) => handleInputChange('selectionReason', e.target.value)}
+            className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
+            rows="4"
+            placeholder="例：面白そうだから。いつも寝ているけど、他の時は何をしているか気になったから。"
+          />
+        </div>
+
+        <div className="flex gap-4">
+          <button onClick={prevStep} className="flex-1 bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 flex items-center justify-center gap-2"><ChevronLeft className="w-5 h-5" /> 戻る</button>
+          <button onClick={nextStep} className="flex-1 bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">研究を始める <ChevronRight className="w-5 h-5" /></button>
+        </div>
+      </div>
+    );
+  };
   const renderResearch = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-green-800 mb-6 font-jpTitle">🔍 たんけんノート</h2>
@@ -285,15 +389,13 @@ ${userRequest}
     </div>
   );
 
-  // --- MAIN JSX RETURN ---
   return (
-    <div className="min-h-screen bg-green-50">
+    <div className="min-h-screen bg-white">
       <header className="text-center p-6 bg-white rounded-xl shadow-lg border-4 border-yellow-300 my-8 max-w-3xl mx-auto">
-        <h1 className="font-jpTitle text-3xl md:text-4xl text-green-700">zooっと自由研究</h1>
-        <h2 className="font-jpTitle text-4xl md:text-5xl text-green-800">夏休みのお助けサイト</h2>
+        <h1 className="font-jpTitle text-4xl md:text-5xl text-green-800">zooっと自由研究 🦁</h1>
       </header>
       <div className="max-w-4xl mx-auto p-4 mb-8">
-        <div className="flex items-center justify-between bg-white p-3 rounded-full shadow">
+        <div className="flex items-center justify-between bg-white p-3 rounded-full shadow-md">
           {steps.map((step, index) => (
             <div key={step.id} className={`flex items-center gap-2 text-sm md:text-base ${index === currentStep ? 'text-green-600 font-bold' : index < currentStep ? 'text-green-500' : 'text-gray-400'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold transition-all ${index === currentStep ? 'bg-green-600 text-white scale-110' : index < currentStep ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>

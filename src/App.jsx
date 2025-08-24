@@ -1,4 +1,4 @@
-import TamaZooResearchTool from './TamaZooResearchTool';
+import TamaZooResearchTool from './components/TamaZooResearchTool';
 
 function App() {
   return (
