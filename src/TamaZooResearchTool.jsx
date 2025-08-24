@@ -42,8 +42,8 @@ const TamaZooResearchTool = () => {
   const nextStep = () => currentStep < steps.length - 1 && setCurrentStep(currentStep + 1);
   const prevStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
 
-  const getAiThemes = async () => {
-    // どちらかの入力が必須
+const getAiThemes = async () => {
+    // どちらかの入力が必須かチェック
     if ((!formData.category || !formData.difficulty) && !formData.freeTextQuery) {
       alert('「おすすめからえらぶ」か「じゆうに書く」のどちらかを入力してね！');
       return;
@@ -52,7 +52,7 @@ const TamaZooResearchTool = () => {
     setProposedThemes([]);
     setCurrentStep(1);
 
-    // ユーザーの入力を基に、AIへのリクエスト文を動的に生成
+    // --- ここからが重要：AIへの指示を動的に組み立てる ---
     let userRequest = '';
     if (formData.category && formData.difficulty) {
         const categoryName = categories.find(c => c.id === formData.category)?.name || '';
@@ -62,6 +62,7 @@ const TamaZooResearchTool = () => {
     if (formData.freeTextQuery) {
         userRequest += `・自由記述: ${formData.freeTextQuery}\n`;
     }
+    // --- ここまで ---
 
     const prompt = `あなたは、東京の「多摩動物公園」の自由研究をサポートする、非常に優秀なAIアシスタントです。
 
@@ -71,7 +72,7 @@ const TamaZooResearchTool = () => {
 # 厳守するルール
 - 提案するテーマは、必ず「多摩動物公園」で観察できる動物や昆虫を題材にしてください。
 - ユーザーの希望が具体的な動物名でなくても、関連する面白い研究を考えてください。
-- 「動物の比較」など、複数の動物や昆虫を横断的に観察するような、ユニークな視点のテーマも積極的に提案してください。
+- 「動物の比較」など、複数の動物や昆C충을 横断的に観察するような、ユニークな視点のテーマも積極的に提案してください。
 - あなたが生成する応答は、指示されたJSON形式のみとし、他のテキストは一切含めないでください。
 
 # 多摩動物公園の主な動物・昆虫（参考）
@@ -86,7 +87,7 @@ const TamaZooResearchTool = () => {
 ${userRequest}
 
 # 出力形式
-以前の指示通り、必ず指定されたJSON形式で応答してください。
+あなたはfunction callingツールが設定されているので、ツール定義に従って応答してください。
 `;
 
     try {
@@ -97,8 +98,10 @@ ${userRequest}
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'AIとの通信に失敗しました。');
+        // サーバーからエラー応答が返ってきた場合、その内容をテキストとして読み取る
+        const errorText = await response.text();
+        console.error("Server error response:", errorText);
+        throw new Error('AIとの通信に失敗しました。サーバーログを確認してください。');
       }
 
       const themes = await response.json();
@@ -106,7 +109,7 @@ ${userRequest}
 
     } catch (error) {
       console.error(error);
-      alert("エラーが発生しました。AIの応答が正しくないか、サーバーに問題があるかもしれません。");
+      alert(error.message || "エラーが発生しました。もう一度お試しください。");
       setCurrentStep(0);
     } finally {
       setIsLoading(false);
