@@ -8,7 +8,6 @@ export default function Home() {
   const { resetForNewResearch } = useResearch();
 
   const goResearch = () => {
-    resetForNewResearch();     // 学年/カテゴリ/難易度など初期化
     navigate("/questions");    // 研究フロー開始
   };
 
