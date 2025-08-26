@@ -1,30 +1,3 @@
-// import React from "react";
-// import { Routes, Route, Navigate } from "react-router-dom";
-// import Layout from "./components/Layout";
-// import Questions from "./pages/Questions";
-// import Themes from "./pages/Themes";
-// import Selection from "./pages/Selection";
-// import Research from "./pages/Research";
-// import Reflection from "./pages/Reflection";
-// import Preview from "./pages/Preview";
-
-// export default function App() {
-//   return (
-//     <Routes>
-//       <Route element={<Layout />}>
-//         <Route index element={<Navigate to="/questions" replace />} />
-//         <Route path="/questions" element={<Questions />} />
-//         <Route path="/themes" element={<Themes />} />
-//         <Route path="/selection" element={<Selection />} />
-//         <Route path="/research" element={<Research />} />
-//         <Route path="/reflection" element={<Reflection />} />
-//         <Route path="/preview" element={<Preview />} />
-//       </Route>
-//     </Routes>
-//   );
-// }
-
-// src/App.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
