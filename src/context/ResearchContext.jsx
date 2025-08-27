@@ -72,6 +72,11 @@ export function ResearchProvider({ children }) {
     }));
   }, []);
 
+  const updateObservationPoint = (pointId, field, value) => {
+    const updatedPoints = formData.observationPoints.map(point => point.id === pointId ? { ...point, [field]: value } : point);
+    setFormData(prev => ({ ...prev, observationPoints: updatedPoints }));
+  };
+
   const value = {
     // 定数
     steps,
@@ -93,6 +98,7 @@ export function ResearchProvider({ children }) {
     nextStep,
     prevStep,
     goTo,
+    updateObservationPoint,
   };
 
   return (
