@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-  
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -20,18 +20,19 @@ export default async function handler(req, res) {
   try {
     let body = req.body;
     if (typeof body === 'string') {
-        body = JSON.parse(body);
+      body = JSON.parse(body);
     }
-    
+
     const { prompt } = body;
+
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash-latest",
       generationConfig: {
-        response_mime_type: "application/json",
+        responseMimeType: "application/json",
       },
     });
 
@@ -40,7 +41,11 @@ export default async function handler(req, res) {
     const jsonText = response.text();
     const parsedResult = JSON.parse(jsonText);
     const themesArray = parsedResult.themes || [];
-    
+
+  /*  console.log("--- APIからの生の応答 ---");
+    console.log(response.text());
+    console.log("--------------------------"); */
+
     return res.status(200).json(themesArray);
 
   } catch (error) {

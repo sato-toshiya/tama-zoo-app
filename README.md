@@ -13,3 +13,13 @@ If you are developing a production application, we recommend using TypeScript wi
 
 # 実行手順
 npm run dev
+
+# ローカル環境でAIを試す時
+npm install -g vercel
+
+.env.local を作成 (こちらのファイルはpushされません)
+GEMINI_API_KEY ='';APIキーを入力
+
+dev vercel で実行
+
+

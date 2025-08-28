@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Loader2 } from "lucide-react";
 import { useResearch } from "../context/ResearchContext";
 import { useNavigate } from "react-router-dom";
 
@@ -13,6 +13,8 @@ export default function Themes() {
     selectTheme,
     nextStep,
     prevStep,
+    isLoading,
+    generateMoreThemes,
   } = useResearch();
 
   const navigate = useNavigate();
@@ -48,9 +50,8 @@ export default function Themes() {
             return (
               <div
                 key={index}
-                className={`bg-white p-6 rounded-lg shadow-md border-2 cursor-pointer transition-colors ${
-                  formData.selectedTheme === theme ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-green-300"
-                }`}
+                className={`bg-white p-6 rounded-lg shadow-md border-2 cursor-pointer transition-colors ${formData.selectedTheme === theme ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-green-300"
+                  }`}
                 onClick={() => selectTheme(theme)}
               >
                 <div className="flex items-start gap-4">
@@ -72,9 +73,8 @@ export default function Themes() {
           return (
             <div
               key={theme.id}
-              className={`bg-white p-6 rounded-lg shadow-md border-2 cursor-pointer transition-colors ${
-                formData.selectedTheme === theme.title ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-green-300"
-              }`}
+              className={`bg-white p-6 rounded-lg shadow-md border-2 cursor-pointer transition-colors ${formData.selectedTheme === theme.title ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-green-300"
+                }`}
               onClick={() => selectTheme(theme)}
             >
               <div className="flex items-start gap-4">
@@ -114,28 +114,20 @@ export default function Themes() {
           下のボタンで他のテーマを提案してもらうことができます！
         </p>
         <button
-          onClick={() => {
-            const categoryThemes = observationThemes[formData.category];
-            if (categoryThemes) {
-              const difficultyLevel = formData.difficulty === '1' ? 'easy' : 
-                                     formData.difficulty === '2' ? 'normal' : 'hard';
-              const allThemes = categoryThemes[difficultyLevel] || [];
-              // 現在表示されていないテーマをランダムに選択
-              const availableThemes = allThemes.filter(theme => 
-                !proposedThemes.some(proposed => proposed.id === theme.id)
-              );
-              if (availableThemes.length > 0) {
-                const newThemes = [...proposedThemes, ...availableThemes.slice(0, 2)];
-                setProposedThemes(newThemes);
-              } else {
-                // 全てのテーマを再表示
-                setProposedThemes(allThemes);
-              }
-            }
-          }}
-          className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          onClick={generateMoreThemes}
+          disabled={isLoading}
+          className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:blue-400 disabled:bg-blue-400 disabled:cursor-wait"
         >
-          🔄 他のテーマを提案してもらう
+          {isLoading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              AIが考えています...
+            </>
+          ) : (
+            <>
+              🔄 他のテーマを提案してもらう
+            </>
+          )}
         </button>
       </div>
 
